@@ -37,6 +37,7 @@
     "@eslint/eslintrc": "^3",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "picomatch": "^4.0.5",
     "typescript": "^6.0.3"
   }
 }
