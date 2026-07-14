@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://hqperfume.in
+
+# Sitemaps
+Sitemap: https://hqperfume.in/sitemap.xml
