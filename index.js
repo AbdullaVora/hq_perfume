@@ -35,16 +35,7 @@ const corsOptions = {
         const allowedOrigins = [
             "http://localhost:5173",
             "http://localhost:3000",
-            "http://192.168.10.11:3000",
-            "https://superadmin-qmet.onrender.com",
-            "https://fur-stpre-next-js.vercel.app",
-            "https://super-admin-xi.vercel.app",
-            "https://fur-stpre-next-7zstxuy2t-abdullavoras-projects.vercel.app",
-            "https://perfume-web-kappa.vercel.app",
-            "https://perfume-5grqmwvd5-abdullavoras-projects.vercel.app",
-            "https://perfume-admin-lqmtolplk-abdullavoras-projects.vercel.app",
-            "https://perfume-admin-xi.vercel.app",
-            "https://hqperfume.in",
+            "https://hq-perfume-git-next-prod-abdullavoras-projects.vercel.app"
             
         ];
 
