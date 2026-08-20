@@ -8,7 +8,7 @@ async function fetchProductById(id) {
 }
 
 export async function generateMetadata({ params }) {
-    const { id } = params;
+    const { id } = await params;
     const product = await fetchProductById(id);
     // console.log("params:", product.product);
 

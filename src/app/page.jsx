@@ -137,8 +137,39 @@ export default function Home() {
 
 
   // console.log(sliders)
+  const defaultTestimonials = [
+    {
+      title: "Unmatched Longevity & Luxury",
+      subTitle: "Rohan Sharma",
+      image: "/images/testimonial_1.png",
+      description: "HQ Perfumes are truly premium. The fragrance stays all day long without fading. I received so many compliments at work!"
+    },
+    {
+      title: "Elegant & Enchanting Scent",
+      subTitle: "Priya Patel",
+      image: "/images/testimonial_2.png",
+      description: "Absolute perfection! The floral and woody notes blend seamlessly. My absolute go-to fragrance for evening events and special occasions."
+    },
+    {
+      title: "Worth Every Single Rupee",
+      subTitle: "Aman Verma",
+      image: "/images/testimonial_3.png",
+      description: "Fast shipping and stunning luxury packaging. The projection is fantastic and it lasts 12+ hours easily. Highly recommended!"
+    },
+    {
+      title: "Sophisticated Fragrance",
+      subTitle: "Neha Kapoor",
+      image: "/images/testimonial_4.png",
+      description: "The notes develop so beautifully over the day. A truly luxurious experience from packaging to performance. I love it!"
+    }
+  ];
+
   const banner = banners.filter((item) => item.forPage === 'Home' && item.forSection === 'Banner' && item.status === true);
   const testimonials = sliders.filter((item) => item.forPage === 'Home' && item.forSection === "Testimonials" && item.status === true);
+  const displayTestimonials = (testimonials && testimonials.length > 0 && !testimonials.some(t => t.description?.toLowerCase().includes('lorem'))) 
+    ? testimonials 
+    : defaultTestimonials;
+
   const flashDeals = products.filter((item) => item.forPage === 'Home' && item.forSection === "Flash Deals" && item.status === true);
   const news = sliders.filter((item) => item.forPage === 'Home' && item.forSection === "Latest News" && item.status === true);
   const arrival = products.filter((item) => item.forPage === 'Home' && item.forSection === "New Arrival" && item.status === true);
@@ -218,7 +249,7 @@ export default function Home() {
       {/* <div className="banner pb-5" data-aos="zoom-out" style={{ backgroundImage: banner[0]?.desktopImage ? `url(${banner[0]?.desktopImage})` : 'none' }}>
         <div className="contents">
           <h1 className='text-white h1-response fw-normal'>Modern Living Room</h1>
-          <p className='text-white p-response text-capitalize'>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+          <p className='text-white p-response text-capitalize'>Discover our handcrafted luxury collection of long-lasting fragrances</p>
           <Link href="/collection"><button className='bg-transparent border-light py-2 px-3 py-sm-3 px-sm-5 text-white rounded-1'>SHOP NOW</button></Link>
         </div>
       </div> */}
@@ -463,7 +494,7 @@ export default function Home() {
             speed={2000}
             fadeEffect={{ crossFade: true }}
           >
-            {testimonials.map((testimonial, index) => (
+            {displayTestimonials.map((testimonial, index) => (
               <SwiperSlide key={index}>
                 <TestiminoalBox
                   title={testimonial.title}
@@ -479,33 +510,39 @@ export default function Home() {
       {/* Testimonial End */}
 
       {/* ****************************** Flash Deals Start ***************************** */}
-      <div className="flashDeals py-5 mt-5">
-        <div className="container">
-          <h2 className="text-center display-5 fw-normal mb-5">Flash Deals</h2>
-          <Swiper
-            modules={[Pagination, Autoplay, EffectFade]}
-            spaceBetween={10}  // Adjust spacing between slides
-            slidesPerView={4}  // Set 4 slides per view
-            autoplay={{ delay: 1000, reverseDirection: true }}
-            loop={true}
-            breakpoints={{
-              0: { slidesPerView: 1 },   // 1 slide for small screens
-              768: { slidesPerView: 2 }, // 2 slides for tablets
-              1024: { slidesPerView: 3 }, // 3 slides for desktops
-              1440: { slidesPerView: 4 }, // 4 slides for larger screens
-            }}
-            speed={2000}
-            fadeEffect={{ crossFade: true }}
-          >
-            {flashDeals.map((flash, index) => (
-              <SwiperSlide key={index}>
-                <FlahCard id={flash._id} title={flash.name} price={flash.variants?.variants[0].price.toFixed(2)} img={flash.thumbnail} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-
+      {flashDeals && flashDeals.length > 0 && (
+        <div className="flashDeals py-5 mt-5">
+          <div className="container">
+            <h2 className="text-center display-5 fw-normal mb-5">Flash Deals</h2>
+            <Swiper
+              modules={[Pagination, Autoplay, EffectFade]}
+              spaceBetween={10}
+              slidesPerView={4}
+              autoplay={{ delay: 3000 }}
+              loop={flashDeals.length >= 4}
+              breakpoints={{
+                0: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+                1440: { slidesPerView: 4 },
+              }}
+              speed={2000}
+              fadeEffect={{ crossFade: true }}
+            >
+              {flashDeals.map((flash, index) => (
+                <SwiperSlide key={index}>
+                  <FlahCard 
+                    id={flash._id} 
+                    title={flash.name} 
+                    price={flash.variants?.variants?.[0]?.price?.toFixed(2) || flash.price?.toFixed(2) || "0.00"} 
+                    img={flash.thumbnail} 
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
         </div>
-      </div>
+      )}
       {/* ****************************** Flash Deals End ***************************** */}
 
       {/* ****************************** Latest News Start ***************************** */}
@@ -612,7 +649,7 @@ export default function Home() {
                 <div className="content text-center text-md-start">
                   <h2 className='display-5 display-md-4 fw-bold mb-3'>Deal Of The Day</h2>
                   <p className='text-muted mb-4 mb-md-5'>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam voluptates...
+                    Unbeatable discounts on our signature luxury perfumes. Grab your favorite scent before the offer ends!
                   </p>
 
 
