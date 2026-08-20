@@ -7,9 +7,11 @@ const apiInstance = axios.create({
 // Add a request interceptor to include token
 apiInstance.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token'); // or whatever your token key is
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
+            }
         }
         return config;
     },

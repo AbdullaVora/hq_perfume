@@ -557,7 +557,6 @@ import { TiMinusOutline, TiPlusOutline } from "react-icons/ti";
 import { fetchProducts } from "@/redux/slice/HomeSlice";
 import Swal from "sweetalert2";
 import Script from "next/script";
-import Head from "next/head";
 
 const ProductDetail = () => {
     const [activeTab, setActiveTab] = useState('description');
@@ -578,7 +577,7 @@ const ProductDetail = () => {
     }, [dispatch]);
 
     const { products, loading: Loading } = useSelector((state) => state.Home.Home);
-    const product = products.filter(item => item._id == id);
+    const product = (products || []).filter(item => item._id == id);
     const cartData = useSelector(state => state.addToCart.Cart);
     const { userId } = useSelector((state) => state.userData)
 
@@ -586,18 +585,13 @@ const ProductDetail = () => {
 
     // Update the productMedia array to include videos and images
     const productMedia = product.length > 0 ? [
-        ...(product[0].main ? [{ url: product[0].main, type: 'image' }] : []),
-        ...(product[0].images || []).map(img => ({ url: img, type: 'image' })),
-        ...(product[0].videos || []).map(vid => ({ url: vid, type: 'video' }))
+        ...(product[0]?.main ? [{ url: product[0].main, type: 'image' }] : []),
+        ...(product[0]?.images || []).map(img => ({ url: img, type: 'image' })),
+        ...(product[0]?.videos || []).map(vid => ({ url: vid, type: 'video' }))
     ] : [];
 
-    // Check if product is in cart
-    // const isInCart = cartData.some(item =>
-    //     item?.product?._id === id && item?.userId === userId
-    // );
-
     // Check if product with the same variants is in cart
-    const isInCart = cartData.some(item => {
+    const isInCart = (cartData || []).some(item => {
         // Check if it's the same product and same user
         if (item?.product?._id !== id || item?.userId !== userId) {
             return false;
@@ -606,7 +600,7 @@ const ProductDetail = () => {
         // Get current selected variants
         const currentVariants = Object.entries(selectedVariants).map(([label, value]) => ({
             label,
-            value: value.value
+            value: value?.value
         }));
 
         // Get cart item variants (handle both old and new format)
@@ -625,20 +619,18 @@ const ProductDetail = () => {
         // Check each variant matches (case-insensitive comparison)
         return cartVariants.every(cartVariant => {
             const matchingVariant = currentVariants.find(
-                v => v.label.toLowerCase() === cartVariant.label?.toLowerCase() &&
-                    v.value.toLowerCase() === cartVariant.value?.toLowerCase()
+                v => v.label?.toLowerCase() === cartVariant.label?.toLowerCase() &&
+                    v.value?.toLowerCase() === cartVariant.value?.toLowerCase()
             );
             return matchingVariant !== undefined;
         });
     });
 
-    console.log(cartData)
-
     // Process variants to include IDs in the options
     const variantOptions = {};
-    if (product.length > 0 && product[0].variants && product[0].variants.variants) {
+    if (product.length > 0 && product[0]?.variants?.variants) {
         product[0].variants.variants.forEach(variant => {
-            variant.data.forEach(option => {
+            (variant?.data || []).forEach(option => {
                 if (!variantOptions[option.label]) {
                     variantOptions[option.label] = [];
                 }
@@ -657,39 +649,48 @@ const ProductDetail = () => {
 
     // Auto-select first variant when product loads
     useEffect(() => {
-        if (product.length > 0 && product[0].variants && product[0].variants.variants && Object.keys(selectedVariants).length === 0) {
-            const initialSelections = {};
-            const firstVariant = product[0].variants.variants[0];
-            console.log(product[0])
+        if (product.length > 0) {
+            const prod = product[0];
+            if (prod?.variants?.variants && prod.variants.variants.length > 0) {
+                if (Object.keys(selectedVariants).length === 0) {
+                    const initialSelections = {};
+                    const firstVariant = prod.variants.variants[0];
 
-            // Set initial price, MRP, and stock
-            setCurrentPrice(firstVariant.price || product[0].price);
-            setCurrentMrp(firstVariant.mrp || product[0].mrp);
-            setCurrentStock(firstVariant.stock || 0);
+                    if (firstVariant) {
+                        setCurrentPrice(firstVariant.price || prod.price || 0);
+                        setCurrentMrp(firstVariant.mrp || prod.mrp || 0);
+                        setCurrentStock(firstVariant.stock || 0);
 
-            // Calculate initial stock percentage
-            const maxStock = firstVariant.maxStock || firstVariant.stock || 100;
-            const soldStock = maxStock - (firstVariant.stock || 0);
-            const soldPercentage = maxStock > 0 ? Math.round((soldStock / maxStock) * 100) : 0;
-            setStockPercentage(soldPercentage);
+                        const maxStock = firstVariant.maxStock || firstVariant.stock || 100;
+                        const soldStock = maxStock - (firstVariant.stock || 0);
+                        const soldPercentage = maxStock > 0 ? Math.round((soldStock / maxStock) * 100) : 0;
+                        setStockPercentage(soldPercentage);
+                    }
 
-            // Auto-select first option for each variant type
-            Object.keys(variantOptions).forEach(label => {
-                const firstOption = variantOptions[label][0];
-                initialSelections[label] = {
-                    value: firstOption.value,
-                    variantId: firstOption.variantId,
-                    variantData: firstOption.variantData,
-                    price: firstOption.price,
-                    mrp: firstOption.mrp,
-                    stock: firstOption.stock,
-                    maxStock: firstOption.maxStock
-                };
-            });
+                    Object.keys(variantOptions).forEach(label => {
+                        const firstOption = variantOptions[label]?.[0];
+                        if (firstOption) {
+                            initialSelections[label] = {
+                                value: firstOption.value,
+                                variantId: firstOption.variantId,
+                                variantData: firstOption.variantData,
+                                price: firstOption.price,
+                                mrp: firstOption.mrp,
+                                stock: firstOption.stock,
+                                maxStock: firstOption.maxStock
+                            };
+                        }
+                    });
 
-            setSelectedVariants(initialSelections);
+                    setSelectedVariants(initialSelections);
+                }
+            } else if (prod) {
+                setCurrentPrice(prod.price || 0);
+                setCurrentMrp(prod.mrp || 0);
+                setCurrentStock(prod.stock || 0);
+            }
         }
-    }, [product, variantOptions]);
+    }, [products, id]);
 
     // Update price and stock when variants change
     const updatePriceFromVariants = (newSelectedVariants) => {
@@ -895,10 +896,10 @@ const ProductDetail = () => {
     const schemaData = {
         "@context": "https://schema.org",
         "@type": "Product",
-        "name": product[0]?.metaTitle,
+        "name": product[0]?.metaTitle || product[0]?.name || "",
         "image": [product[0]?.main],
-        "description": product[0]?.metaDescription,
-        "sku": product[0]?.sku,
+        "description": product[0]?.metaDescription || product[0]?.description || "",
+        "sku": product[0]?.sku || product[0]?.skuCode || "",
         "brand": {
             "@type": "Brand",
             "name": "HQ PERFUME"
@@ -906,21 +907,19 @@ const ProductDetail = () => {
         "offers": {
             "@type": "Offer",
             "priceCurrency": "INR",
-            "price": currentPrice.toFixed(2),
+            "price": (currentPrice || 0).toFixed(2),
             "availability": "https://schema.org/InStock"
         }
     };
 
     return (
         <>
-            <Head>
-                <Script
-                    id="product-jsonld"
-                    type="application/ld+json"
-                    strategy="afterInteractive"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-                />
-            </Head>
+            <Script
+                id="product-jsonld"
+                type="application/ld+json"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+            />
 
             <div className="productDetail py-5 border-bottom">
                 <div className="container">
@@ -1000,11 +999,11 @@ const ProductDetail = () => {
                                 <span className='fw-bold ms-3 opacity-75 pr-detail-span'>View All Ratings</span>
                             </div>
                             <div className="priceArea py-3 d-flex align-items-center">
-                                <span className='fw-bold fs-5 opacity-50'><del>₹{currentMrp.toFixed(2)}</del></span>
+                                <span className='fw-bold fs-5 opacity-50'><del>₹{(currentMrp || 0).toFixed(2)}</del></span>
                                 <span className='fw-bold opacity-50'>&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;</span>
-                                <span className='discount_price fw-bold fs-5'>₹{currentPrice.toFixed(2)}</span>
+                                <span className='discount_price fw-bold fs-5'>₹{(currentPrice || 0).toFixed(2)}</span>
                                 <span className='discount_per mx-3 fw-bold text-white py-1 px-3 rounded-5' style={{ backgroundColor: '#ff6400', fontSize: '12px' }}>
-                                    {currentMrp > 0 ? Math.round(((currentMrp - currentPrice) / currentMrp) * 100) : product[0]?.mainDiscount}%
+                                    {currentMrp > 0 ? Math.round(((currentMrp - currentPrice) / currentMrp) * 100) : product[0]?.mainDiscount || 0}%
                                 </span>
                             </div>
                             <p className='opacity-75 fw-medium' style={{ fontSize: '16px' }}>{product[0]?.description}</p>

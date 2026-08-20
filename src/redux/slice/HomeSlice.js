@@ -18,7 +18,7 @@ export const fetchBanners = createAsyncThunk(
             const response = await apiInstance.get(`${API_URL}/banners`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -31,7 +31,7 @@ export const fetchSliders = createAsyncThunk(
             const response = await apiInstance.get(`${API_URL}/sliders`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -44,7 +44,7 @@ export const fetchProducts = createAsyncThunk(
             console.log("data:" ,response.data)
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
